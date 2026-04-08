@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Templates - Record Generator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+        .navbar {
+            background: #667eea;
+            color: white;
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .navbar h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .user-info span {
+            opacity: 0.9;
+        }
+        .btn-logout {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.4);
+            padding: 8px 16px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+        .btn-logout:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        .welcome {
+            margin-bottom: 30px;
+        }
+        .welcome h2 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+        .welcome p {
+            color: #666;
+            margin: 0;
+        }
+        .actions {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 16px 32px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        .btn-secondary {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+        .btn-secondary:hover {
+            background: #f0f3ff;
+        }
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 24px;
+        }
+        .template-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border: 1px solid #e0e0e0;
+            transition: all 0.3s;
+            position: relative;
+        }
+        .template-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        }
+        .template-icon {
+            font-size: 40px;
+            margin-bottom: 16px;
+        }
+        .template-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin: 0 0 8px 0;
+            word-break: break-word;
+        }
+        .template-code {
+            font-family: monospace;
+            background: #f0f0f0;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #666;
+            display: inline-block;
+            margin-bottom: 12px;
+        }
+        .template-date {
+            font-size: 13px;
+            color: #999;
+            margin-bottom: 16px;
+        }
+        .template-actions {
+            display: flex;
+            gap: 8px;
+        }
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 14px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            flex: 1;
+            text-align: center;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-edit {
+            background: #667eea;
+            color: white;
+        }
+        .btn-edit:hover {
+            background: #5568d3;
+        }
+        .btn-delete {
+            background: #fee;
+            color: #c33;
+        }
+        .btn-delete:hover {
+            background: #fcc;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+        .empty-state h3 {
+            margin: 0 0 8px 0;
+            color: #666;
+        }
+        .flash-messages {
+            margin-bottom: 20px;
+        }
+        .flash {
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-size: 15px;
+        }
+        .flash.success {
+            background: #efe;
+            color: #3c3;
+            border: 1px solid #cfc;
+        }
+        .flash.error {
+            background: #fee;
+            color: #c33;
+            border: 1px solid #fcc;
+        }
+        .code-input-section {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .code-input-section h3 {
+            margin: 0 0 16px 0;
+            color: #333;
+        }
+        .code-form {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .code-input {
+            flex: 1;
+            min-width: 200px;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .code-input:focus {
+            border-color: #667eea;
+            outline: none;
+        }
+        @media (max-width: 600px) {
+            .navbar {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+            .template-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h1>📄 RecoForge</h1>
+        <div class="user-info">
+            <span>Welcome, {{ username }}!</span>
+            <a href="{{ url_for('logout') }}" class="btn-logout">Logout</a>
+        </div>
+    </div>
+
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <div class="welcome">
+            <h2>My Templates</h2>
+            <p>Create a new document template or continue working on an existing one.</p>
+        </div>
+
+        <div class="actions">
+            <a href="{{ url_for('editor') }}" class="btn btn-primary">
+                <span>+</span> Create New Template
+            </a>
+        </div>
+
+        <div class="code-input-section">
+            <h3>🔓 Load Shared Template</h3>
+            <p style="color: #666; margin-bottom: 12px;">Have a template code? Enter it below:</p>
+            <form class="code-form" onsubmit="loadSharedTemplate(event)">
+                <input type="text" class="code-input" id="sharedCode" placeholder="ENTER CODE" maxlength="8">
+                <button type="submit" class="btn btn-secondary">Load Template</button>
+            </form>
+        </div>
+
+        {% if templates %}
+            <div class="template-grid">
+                {% for template in templates %}
+                <div class="template-card">
+                    <div class="template-icon">📄</div>
+                    <h3 class="template-name">{{ template.name }}</h3>
+                    <div class="template-code">{{ template.code }}</div>
+                    <div class="template-date">Created: {{ template.created_at.strftime('%b %d, %Y') }}</div>
+                    <div class="template-actions">
+                        <a href="{{ url_for('editor_with_template', template_code=template.code) }}" class="btn-small btn-edit">Edit</a>
+                        <form method="POST" action="{{ url_for('delete_template', template_id=template.id) }}" style="flex: 1;">
+                            <button type="submit" class="btn-small btn-delete" style="width: 100%;">Delete</button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">📭</div>
+                <h3>No templates yet</h3>
+                <p>Click "Create New Template" to get started!</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <script>
+        function loadSharedTemplate(event) {
+            event.preventDefault();
+            const code = document.getElementById('sharedCode').value.trim();
+            if (code.length === 8) {
+                window.location.href = '/editor/' + code;
+            } else {
+                alert('Please enter a valid 8-character code');
+            }
+        }
+    </script>
+</body>
+</html>

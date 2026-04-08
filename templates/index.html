@@ -1,0 +1,2588 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Record Generator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<style>
+:root {
+    --primary-color: #2196F3;
+    --secondary-color: #ff9800;
+    --success-color: #4CAF50;
+    --danger-color: #f44336;
+    --footer-color: #9c27b0;
+    --bg-color: #f5f5f5;
+    --card-bg: #ffffff;
+    --text-color: #333333;
+    --border-radius: 8px;
+    --spacing: 16px;
+    --touch-target: 44px;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background: var(--bg-color);
+    margin: 0;
+    padding: 0;
+    color: var(--text-color);
+    line-height: 1.6;
+    font-size: 16px;
+}
+.container { max-width: 800px; margin: 0 auto; padding: var(--spacing); }
+h2 { text-align: center; color: var(--text-color); margin: 0 0 var(--spacing) 0; font-size: clamp(1.5rem, 5vw, 2rem); }
+h3 { color: var(--text-color); margin: var(--spacing) 0 calc(var(--spacing) / 2) 0; font-size: clamp(1.1rem, 4vw, 1.3rem); }
+form {
+    background: var(--card-bg);
+    padding: var(--spacing);
+    border-radius: var(--border-radius);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+input[type="text"], input[type="number"], select, textarea, input[type="file"] {
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 16px;
+    min-height: var(--touch-target);
+    -webkit-appearance: none;
+}
+input[type="checkbox"] { width: 24px; height: 24px; margin-right: 8px; vertical-align: middle; }
+label { display: flex; align-items: center; margin: 8px 0; font-size: 16px; min-height: var(--touch-target); }
+button, .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: var(--touch-target);
+    min-width: var(--touch-target);
+    padding: 12px 20px;
+    margin: 8px 4px;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    width: 100%;
+}
+button:active { transform: scale(0.98); }
+.btn-primary { background: var(--primary-color); color: white; }
+.btn-primary:hover { background: #1976D2; }
+.btn-success { background: var(--success-color); color: white; }
+.btn-success:hover { background: #45a049; }
+.btn-warning { background: var(--secondary-color); color: white; }
+.btn-warning:hover { background: #f57c00; }
+.btn-secondary { background: #9c27b0; color: white; }
+.btn-secondary:hover { background: #7b1fa2; }
+.btn-danger { background: var(--danger-color); color: white; }
+.btn-danger:hover { background: #d32f2f; }
+.btn-info { background: #00bcd4; color: white; }
+.btn-info:hover { background: #00acc1; }
+.btn-footer { background: var(--footer-color); color: white; }
+.btn-footer:hover { background: #7b1fa2; }
+
+/* Footer badge styling */
+.footer-badge {
+    background: var(--footer-color);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: bold;
+    margin-left: 8px;
+}
+
+/* Multi-page preview styles - FIXED A4 SIZE */
+.preview-page {
+    display: none;
+    margin-bottom: 20px;
+    min-height: 297mm;      /* Fixed A4 height */
+    max-height: 297mm;
+    height: 297mm;
+    overflow: hidden;
+}
+
+.preview-page.active {
+    display: block;
+}
+
+.pagination-controls button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+
+/* ==================== HEADING BOXES ==================== */
+.headingBox {
+    background: var(--card-bg);
+    border: 1px solid #e0e0e0;
+    border-radius: var(--border-radius);
+    margin: var(--spacing) 0;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+.headingBox.is-footer {
+    border: 2px solid #333;
+    background: var(--card-bg);
+}
+.headingBox.is-footer .headingHeader {
+    background: #f0f0f0;  /* Same grey as regular heading */
+}
+.headingHeader {
+    background: #f0f0f0;
+    padding: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: var(--touch-target);
+    font-size: 16px;
+    border-bottom: 1px solid #e0e0e0;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.headingHeader::after {
+    content: '▼';
+    font-size: 12px;
+    transition: transform 0.3s;
+}
+.headingHeader.collapsed::after { transform: rotate(-90deg); }
+.headingContent {
+    padding: var(--spacing);
+    display: none;
+}
+.headingContent.active { display: block; }
+/* ==================== TEMPLATE SECTION ==================== */
+.template-section {
+    background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+    border: 2px solid var(--secondary-color);
+    padding: var(--spacing);
+    margin: var(--spacing) 0;
+    border-radius: var(--border-radius);
+}
+.code-display {
+    background: #263238;
+    color: #00e676;
+    padding: 20px;
+    border-radius: 6px;
+    font-family: 'Courier New', monospace;
+    font-size: clamp(1.2rem, 6vw, 1.5rem);
+    text-align: center;
+    margin: 12px 0;
+    letter-spacing: 4px;
+    word-break: break-all;
+}
+.code-input {
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    font-weight: bold;
+    text-align: center;
+}
+.message {
+    padding: 12px;
+    border-radius: 6px;
+    margin: 12px 0;
+    display: none;
+    font-weight: 500;
+}
+.message.success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+    display: block;
+}
+.message.error {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+    display: block;
+}
+
+/* ==================== IMAGE PREVIEW MODAL ==================== */
+.image-preview-modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.85);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+.image-preview-content {
+    background: #e8e8e8;
+    margin: 10px auto;
+    padding: var(--spacing);
+    width: 95%;
+    max-width: 900px;
+    border-radius: var(--border-radius);
+    position: relative;
+    min-height: calc(100vh - 20px);
+}
+.close-image-preview {
+    position: absolute;
+    right: 16px;
+    top: 12px;
+    font-size: 32px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #666;
+    z-index: 10;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+.close-image-preview:hover {
+    background: rgba(0,0,0,0.1);
+    color: #000;
+}
+.controls-panel {
+    background: var(--card-bg);
+    padding: var(--spacing);
+    margin-bottom: var(--spacing);
+    border-radius: var(--border-radius);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+.control-group {
+    margin: 16px 0;
+}
+.control-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #555;
+}
+.slider-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+input[type="range"] {
+    flex: 1;
+    min-width: 200px;
+    height: 44px;
+}
+.value-display {
+    background: #f0f0f0;
+    padding: 8px 16px;
+    border-radius: 6px;
+    min-width: 60px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+/* ==================== VISUAL PREVIEW MODAL ==================== */
+.visual-preview-modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.85);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+.visual-preview-content {
+    background: #e8e8e8;
+    margin: 20px auto;
+    padding: 20px;
+    width: 95%;
+    max-width: 900px;
+    border-radius: 8px;
+    position: relative;
+}
+.close-visual-preview {
+    position: absolute;
+    right: 16px;
+    top: 12px;
+    font-size: 32px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #666;
+    z-index: 10;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+.close-visual-preview:hover {
+    background: rgba(0,0,0,0.1);
+    color: #000;
+}
+.preview-title {
+    text-align: center;
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    color: #333;
+}
+
+/* ==================== WORD PAGE ==================== */
+/* ==================== WORD PAGE - FIXED A4 SIZE ==================== */
+.word-page {
+    width: 210mm;           /* A4 width */
+    min-height: 297mm;      /* A4 height */
+    max-height: 297mm;      /* Fixed height - won't grow */
+    height: 297mm;          /* Exact A4 height */
+    background: white;
+    margin: 0 auto 20px;    /* Center with margin between pages */
+    position: relative;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    padding: 15mm;          /* Standard A4 margins */
+    box-sizing: border-box;
+    line-height: 1.15;
+    overflow: hidden;       /* Hide overflow - content cut off at page end */
+    page-break-after: always;
+}
+.page-content {
+    position: relative;
+    z-index: 2;
+    height: 267mm;          /* 297mm - 15mm top - 15mm bottom */
+    max-height: 267mm;
+    overflow: hidden;       /* Cut off at page boundary */
+}
+.word-page.with-border {
+    border: 3px solid #000;
+    outline: 24px solid white;
+    outline-offset: -27px;
+}
+#sharePanel {
+    animation: slideDown 0.3s ease-out;
+}
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.watermark {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-45deg);
+    font-size: 60pt;
+    font-family: 'Calibri', sans-serif;
+    color: rgba(200, 200, 200, 0.25);
+    pointer-events: none;
+    white-space: nowrap;
+    z-index: 1;
+    user-select: none;
+    text-align: center;
+    width: 150%;
+}
+.page-indicator {
+    background: var(--primary-color);
+    color: white;
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 16px;
+    font-weight: bold;
+    text-align: center;
+    font-size: 16px;
+}
+.page-content {
+    position: relative;
+    z-index: 2;
+    min-height: 9in;
+}
+.preview-heading {
+    margin-bottom: 0;
+    line-height: 1.15;
+    font-weight: bold;
+}
+.preview-text {
+    margin-bottom: 0;
+    line-height: 1.15;
+    white-space: pre-wrap;
+}
+.preview-image {
+    margin: 0;
+    display: block;
+}
+.preview-image img {
+    max-width: 100%;
+    height: auto;
+    border: 1px solid #ddd;
+}
+.preview-footer {
+    position: absolute;
+    bottom: 0.3in;
+    left: 0.5in;
+    right: 0.5in;
+    text-align: left;  /* Always left aligned */
+    border-top: 1px solid #000;  /* Black border */
+    padding-top: 8px;
+    font-size: 10pt;
+    color: #000;  /* Solid black, not grey */
+}
+
+/* Mobile A4 scaling */
+@media (max-width: 768px) {
+    .word-page {
+        width: 100vw !important;           /* Full viewport width */
+        min-height: calc(100vw * 1.414) !important;  /* A4 ratio (297/210) */
+        max-height: calc(100vw * 1.414) !important;
+        height: calc(100vw * 1.414) !important;
+        padding: 5mm !important;
+        transform: none !important;
+        margin: 10px auto !important;
+    }
+
+    .page-content {
+        height: calc(100vw * 1.414 - 10mm) !important;
+        max-height: calc(100vw * 1.414 - 10mm) !important;
+    }
+
+    .preview-heading {
+        font-size: 14pt !important;
+    }
+
+    .preview-text {
+        font-size: 11pt !important;
+    }
+
+    .preview-footer {
+        position: absolute !important;
+        bottom: 5mm !important;
+        left: 5mm !important;
+        right: 5mm !important;
+        font-size: 9pt !important;
+    }
+
+    .watermark {
+        font-size: 24pt !important;
+    }
+
+    /* Modal content */
+    .image-preview-content,
+    .visual-preview-content {
+        width: 98% !important;
+        margin: 5px auto !important;
+        padding: 10px !important;
+    }
+
+    .pagination-controls {
+        flex-direction: column !important;
+        gap: 8px !important;
+    }
+
+    .pagination-controls button {
+        width: 100% !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .word-page {
+        padding: 0.2in !important;
+    }
+
+    .preview-heading {
+        font-size: 12pt !important;
+    }
+
+    .preview-text {
+        font-size: 10pt !important;
+    }
+}
+
+.hidden { display: none !important; }
+.text-center { text-align: center; }
+
+@media (min-width: 769px) {
+    button, .btn { width: auto; }
+    .headingHeader { flex-wrap: nowrap; }
+    .control-group {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+    .control-group label {
+        width: 120px;
+        margin-bottom: 0;
+    }
+    .slider-container {
+        flex: 1;
+    }
+}
+</style>
+<base target="_blank">
+
+</head>
+<body>
+<!-- Add this at the top of index.html body -->
+<div style="background: #667eea; color: white; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <h1 style="margin: 0; font-size: 20px;">📄 RecoForge</h1>
+    <div>
+        <a href="{{ url_for('dashboard') }}" style="color: white; text-decoration: none; margin-right: 20px; opacity: 0.9;">← Back to Templates</a>
+        <span style="opacity: 0.9;">{{ current_user.username }}</span>
+    </div>
+</div>
+
+<div class="container">
+
+<h2>Template Creation</h2>
+
+
+<form method="POST" id="mainForm" enctype="multipart/form-data">
+
+
+<label style="font-weight: 600;">
+    <input type="checkbox" name="border" id="borderCheck">
+    Add Page Border
+</label>
+
+<br><br>
+
+<label style="font-weight: 600;">
+    <input type="checkbox" id="wmcheck" onclick="toggleWM()">
+    Add Watermark
+</label>
+
+<div id="wmtext" class="hidden" style="margin-top: 12px;">
+    <label>
+        Watermark Text:
+        <input type="text" name="watermark" id="watermarkText" placeholder="e.g., CONFIDENTIAL" style="margin-top: 8px;">
+    </label>
+</div>
+<div style="margin-top: 16px; margin-bottom: 8px;">
+    <label style="font-weight: 600; display: flex; align-items: center; gap: 8px;">
+        Page Layout:
+        <select name="layout" id="layoutSelect" style="width: auto; min-width: 150px; font-size: 16px;">
+            <option value="normal">Normal (1" margins)</option>
+            <option value="narrow" selected>Narrow (0.5" margins)</option>
+        </select>
+    </label>
+</div>
+<hr style="margin: 20px 0; border: none; border-top: 1px solid #ddd;">
+
+<h3>Heading Builder</h3>
+
+<div id="headingContainer"></div>
+
+<button type="button" class="btn btn-primary" onclick="addHeading()">+ Add Heading</button>
+<button type="button" class="btn btn-footer" onclick="addFooter()">+ Add Footer</button>
+
+<input type="hidden" name="headings" id="headingsData">
+
+<br><br>
+<!-- Add this at the top of the share panel -->
+<!-- Save Section with Name Input -->
+<div style="margin-bottom: 20px; padding: 16px; background: #e8f5e9; border-radius: 8px; border: 2px solid #4CAF50;">
+    <p style="margin: 0 0 12px 0; font-weight: 600; color: #2e7d32;">
+        💾 Save Your Work
+    </p>
+
+    <!-- Template Name Input -->
+    <label style="display: block; margin-bottom: 12px; font-weight: 500; color: #333;">
+        Template Name:
+        <input type="text" id="templateNameInput" placeholder="Enter template name..."
+               style="width: 100%; margin-top: 6px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 16px;"
+               value="My Template">
+    </label>
+
+    <button type="button" class="btn btn-success" onclick="saveTemplateOnly()" style="width: 100%; margin: 0;">
+        Save Template
+    </button>
+    <div id="saveOnlyMsg" class="message" style="margin-top: 12px; display: none;"></div>
+</div>
+
+<hr style="border-color: #ffcc80; margin: 16px 0;">
+
+<div style="display: flex; gap: 12px; flex-wrap: wrap;">
+    <button type="submit" class="btn btn-success" style="flex: 2; min-width: 200px; font-size: 18px; padding: 16px;">
+        ⬇️ Download Word File
+    </button>
+    <button type="button" class="btn btn-warning" onclick="toggleSharePanel()" style="flex: 1; min-width: 120px; font-size: 16px; padding: 16px;">
+        🔗 Share/Load
+    </button>
+</div>
+<button type="button" class="btn btn-info" onclick="showFullDocumentPreview()" style="width: 100%; font-size: 18px; padding: 16px; margin-top: 8px;">
+    👁️ Preview Document
+</button>
+
+<!-- Collapsible Share/Load Panel -->
+<div id="sharePanel" class="hidden" style="margin-top: 16px; padding: 20px; background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%); border: 2px solid var(--secondary-color); border-radius: var(--border-radius);">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h3 style="margin: 0; color: #e65100;">📤 Share / 📥 Load Template</h3>
+        <button type="button" onclick="toggleSharePanel()" style="background: none; border: none; font-size: 24px; cursor: pointer; padding: 4px; width: auto; min-height: auto;">✕</button>
+
+    </div>
+
+    <div style="margin-bottom: 20px;">
+        <p style="margin: 0 0 12px 0; font-weight: 500;">Generate a code to share your template:</p>
+        <button type="button" class="btn btn-warning" onclick="generateShareCode()" style="width: 100%; margin: 0;">
+            💾 Generate Share Code
+        </button>
+        <div id="codeDisplayArea" class="hidden" style="margin-top: 16px;">
+            <p style="margin: 0 0 8px 0;"><strong>Your Template Code:</strong></p>
+            <div class="code-display" id="generatedCode"></div>
+            <button type="button" class="btn btn-primary" onclick="copyCode()" style="width: 100%; margin: 8px 0 0 0;">
+                📋 Copy Code
+            </button>
+        </div>
+    </div>
+
+    <hr style="border-color: #ffcc80; margin: 16px 0;">
+
+    <div>
+        <p style="margin: 0 0 12px 0; font-weight: 500;"><strong>Load template from code:</strong></p>
+        <input type="text" id="loadCodeInput" class="code-input" placeholder="ENTER 8-CHAR CODE" maxlength="8" autocomplete="off" style="margin-bottom: 12px;">
+        <button type="button" class="btn btn-secondary" onclick="loadTemplate()" style="width: 100%; margin: 0;">
+            🔄 Load Template
+        </button>
+    </div>
+
+    <div class="message" id="successMsg" style="margin-top: 12px;"></div>
+    <div class="message" id="errorMsg" style="margin-top: 12px;"></div>
+
+        <hr style="border-color: #ffcc80; margin: 16px 0;">
+
+        <div style="background: #e3f2fd; padding: 16px; border-radius: 8px; border: 2px solid var(--primary-color);">
+        <p style="margin: 0 0 12px 0; font-weight: 600; color: #1565c0;">
+            📄 Import Content
+        </p>
+
+        <!-- Tab switching -->
+        <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+            <button type="button" id="tabFileBtn" onclick="switchImportTab('file')" class="btn btn-primary" style="flex: 1; margin: 0; background: #1565c0; opacity: 1;">
+                📁 From File
+            </button>
+            <button type="button" id="tabTextBtn" onclick="switchImportTab('text')" class="btn btn-secondary" style="flex: 1; margin: 0; background: #757575;">
+                ✏️ From Text
+            </button>
+        </div>
+
+        <!-- File Upload Section -->
+        <div id="importFileSection">
+            <p style="margin: 0 0 12px 0; font-size: 14px; color: #555;">
+                Upload a .docx file with matching headings
+            </p>
+            <input type="file" id="importDocFile" accept=".docx" style="margin-bottom: 12px; background: white;">
+            <button type="button" class="btn btn-primary" onclick="importFromDocument()" style="width: 100%; margin: 0; background: #1565c0;">
+                🔄 Import from File
+            </button>
+        </div>
+
+        <!-- Text Input Section -->
+        <div id="importTextSection" style="display: none;">
+            <p style="margin: 0 0 12px 0; font-size: 14px; color: #555;">
+                Paste text with headings matching your template
+            </p>
+            <textarea id="importTextArea" rows="8" placeholder="Paste your content here...
+
+Example:
+Introduction
+This is the intro text.
+
+Methodology
+This is the method section." style="margin-bottom: 12px; font-family: monospace; font-size: 14px; width: 100%;"></textarea>
+            <button type="button" class="btn btn-primary" onclick="importFromText()" style="width: 100%; margin: 0; background: #1565c0;">
+                🔄 Import from Text
+            </button>
+        </div>
+
+        <div class="message" id="importSuccessMsg" style="margin-top: 12px; display: none;"></div>
+        <div class="message" id="importErrorMsg" style="margin-top: 12px; display: none;"></div>
+    </div>
+</div>
+
+</form>
+
+</div>
+
+<!-- IMAGE PREVIEW MODAL -->
+<div id="imagePreviewModal" class="image-preview-modal">
+    <div class="image-preview-content">
+        <span class="close-image-preview" onclick="closeImagePreview()">&times;</span>
+
+        <div class="controls-panel">
+            <h3>🖼️ Image Settings</h3>
+
+            <div class="control-group">
+                <label>Width:</label>
+                <div class="slider-container">
+                    <input type="range" id="widthSlider" min="1" max="10" step="0.1" value="4" oninput="updateDimensions()">
+                    <span class="value-display" id="widthValue">4"</span>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>Height:</label>
+                <div class="slider-container">
+                    <input type="range" id="heightSlider" min="1" max="10" step="0.1" value="3" oninput="updateDimensions()">
+                    <span class="value-display" id="heightValue">3"</span>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>Lines after:</label>
+                <div class="slider-container">
+                    <input type="number" id="previewImageAfter" value="0" min="0" style="width: 80px;">
+                    <label style="margin-left: 16px; font-weight: normal;">
+                        <input type="checkbox" id="previewImageTillEnd">
+                        Till End
+                    </label>
+                </div>
+            </div>
+
+            <button class="btn btn-success" onclick="saveImageSettings()" style="width: 100%; margin-top: 16px;">
+                💾 Save Changes
+            </button>
+        </div>
+
+        <h3 style="text-align: center; margin-bottom: 12px;">📄 Document Preview</h3>
+        <div class="page-indicator" id="imagePageIndicator">Page 1</div>
+
+        <div id="imageWordPreview" class="word-page">
+            <!-- Content will be dynamically inserted here -->
+        </div>
+    </div>
+</div>
+
+<!-- VISUAL PREVIEW MODAL -->
+<div id="visualPreviewModal" class="visual-preview-modal">
+    <div class="visual-preview-content">
+        <span class="close-visual-preview" onclick="closeVisualPreview()">&#10005;</span>
+        <div class="preview-title">📄 Document Preview</div>
+        <div class="page-indicator" id="visualPageIndicator">Page 1</div>
+        <div id="visualWordPreview" class="word-page">
+            <!-- Content rendered here -->
+        </div>
+    </div>
+</div>
+
+<script>
+    function saveTemplateOnly() {
+    let templateData = collectTemplateData();
+    if(templateData.headings.length === 0) {
+        showError("Create at least one heading first!");
+        return;
+    }
+
+    // Check if we already have a template code (editing existing)
+    let existingCode = document.getElementById('generatedCode')?.textContent?.trim();
+    if (existingCode && existingCode.length === 8) {
+        templateData.template_code = existingCode;
+    }
+
+    // Get template name from input field
+let templateName = document.getElementById('templateNameInput').value.trim();
+if (!templateName) {
+    templateName = "My Template"; // Default if empty
+}
+
+templateData.template_name = templateName;
+
+    // Show saving state
+    let btn = event.target;
+    let originalText = btn.textContent;
+    btn.textContent = "⏳ Saving...";
+    btn.disabled = true;
+
+    fetch('/save_template', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(templateData)
+    })
+    .then(r => r.json())
+    .then(data => {
+        btn.textContent = originalText;
+        btn.disabled = false;
+
+        if(data.success) {
+            // Show the code if it's a new template
+            if (!existingCode) {
+                document.getElementById('generatedCode').textContent = data.code;
+                document.getElementById('codeDisplayArea').classList.remove('hidden');
+            }
+
+            showSaveOnlyMsg("Template saved successfully!", "success");
+        } else {
+            showSaveOnlyMsg("Error: " + data.error, "error");
+        }
+    })
+    .catch(err => {
+        btn.textContent = originalText;
+        btn.disabled = false;
+        showSaveOnlyMsg("Network error: " + err, "error");
+    });
+}
+
+function showSaveOnlyMsg(msg, type) {
+    let el = document.getElementById('saveOnlyMsg');
+    el.textContent = msg;
+    el.className = 'message ' + type;
+    el.style.display = 'block';
+    setTimeout(() => el.style.display = 'none', 3000);
+}
+    function getLastHeadingSettings() {
+    for (let i = headingCount - 1; i >= 0; i--) {
+
+        if (document.getElementById("font"+i)) {
+            return {
+                font: document.getElementById("font"+i).value,
+                size: document.getElementById("size"+i).value
+            };
+        }
+
+    }
+
+    return {
+        font: "Calibri",
+        size: 16
+    };
+}
+
+let headingCount = 0;
+let currentEditingId = null;
+let currentImageData = null;
+const LINES_PER_PAGE = 45;
+
+// ==================== FOOTER FUNCTIONS ====================
+
+function addFooter() {
+    let id = headingCount++;
+    let div = document.createElement('div');
+    div.innerHTML = `
+       <div class="headingBox is-footer" id="box${id}" data-is-footer="true">
+        <div class="headingHeader" onclick="toggleSection(${id})">
+            <span>Footer <span class="footer-badge">PAGE FOOTER</span></span>
+            <button type="button" class="btn btn-danger" onclick="deleteHeading(${id}, event)" style="padding: 4px 12px; font-size: 12px; width: auto; min-height: 32px; margin: 0;">🗑️ Delete</button>
+        </div>
+        <div class="headingContent active" id="content${id}">
+
+            <label><strong>Footer Text:</strong>
+                <input type="text" id="text${id}" value="" placeholder="Enter footer text here">  <!-- No default value -->
+            </label>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin: 12px 0; align-items: end;">
+                <label>Font:
+                    <select id="font${id}">
+                        <option selected>Calibri</option>
+                        <option>Arial</option>
+                        <option>Arial Black</option>
+                        <option>Times New Roman</option>
+                        <option>Courier New</option>
+                    </select>
+                </label>
+                <label>Size:
+                    <input type="number" id="size${id}" value="10" min="6" max="72">
+                </label>
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; margin-bottom: 8px;">
+                    <input type="checkbox" id="bold${id}" onchange="toggleBoldStyle(${id})" style="width: 20px; height: 20px;">
+                    <span style="font-weight: bold; font-size: 16px;">Bold</span>
+                </label>
+            </div>
+
+            <!-- REMOVED: Alignment selector - always left aligned -->
+
+            <input type="hidden" id="footerAlign${id}" value="left">  <!-- Always left -->
+
+            <hr style="margin: 16px 0;">
+
+            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 12px 0;">
+                <label style="flex: 1; min-width: 120px; font-weight: 600;">Before Lines:
+                    <input type="number" id="hBefore${id}" value="0" min="0" placeholder="Lines before footer">
+                </label>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                <label style="flex: 1; min-width: 120px;">Lines after:
+                    <input type="number" id="lines${id}" value="0">
+                </label>
+                <label style="display: flex; align-items: center; margin: 0;">
+                    <input type="checkbox" id="mode${id}" onclick="spacingModeChange(${id})">
+                    <span style="margin-left: 8px;">Till End</span>
+                </label>
+            </div>
+
+            <hr style="margin: 16px 0;">
+
+            <label style="font-weight: 600;">
+                <input type="checkbox" id="textEnable${id}" onchange="toggleText(${id})">
+                Enable Text Block
+            </label>
+
+            <div id="textBlock${id}" class="hidden" style="margin-top: 12px; padding: 12px; background: #f9f9f9; border-radius: 6px;">
+                <label>Before Lines:
+                    <input type="number" id="tBefore${id}" value="0">
+                </label>
+                <label>Content:
+                    <textarea id="tContent${id}" rows="4" placeholder="Enter text content..."></textarea>
+                </label>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <label>Font:
+                        <select id="tFont${id}">
+                            <option>Calibri</option>
+                            <option>Arial</option>
+                            <option>Arial Black</option>
+                            <option>Times New Roman</option>
+                        </select>
+                    </label>
+                    <label>Size:
+                        <input type="number" id="tSize${id}" value="12">
+                    </label>
+                </div>
+                <label style="margin-top: 12px;">After Lines:
+                    <input type="number" id="tAfter${id}" value="0">
+                </label>
+                <label style="margin-top: 8px;">
+                    <input type="checkbox" id="tMode${id}">
+                    Till End
+                </label>
+            </div>
+
+            <input type="hidden" id="isFooter${id}" value="true">
+            <input type="hidden" id="imageEnable${id}">
+        </div>
+    </div>
+    `;
+    document.getElementById('headingContainer').appendChild(div.firstElementChild);
+    setTimeout(() => toggleSection(id), 100);
+}
+// ==================== toggleshare ====================
+
+function toggleSharePanel() {
+    let panel = document.getElementById("sharePanel");
+    panel.classList.toggle("hidden");
+}
+// ==================== IMAGE PREVIEW FUNCTIONS ====================
+
+function handleImageSelect(id, input){
+    if(input.files && input.files[0]){
+        let file = input.files[0];
+        let reader = new FileReader();
+
+        reader.onload = function(e){
+            currentImageData = e.target.result;
+            currentEditingId = id;
+            document.getElementById("imgData"+id).value = currentImageData;
+            buildImagePreview(id);
+            openImagePreview();
+        };
+
+        reader.readAsDataURL(file);
+    }
+}
+
+function calculateTotalLinesBefore(targetId) {
+    let totalLines = 0;
+
+    for(let i=0; i<targetId; i++){
+        if(!document.getElementById("text"+i)) continue;
+        if(document.getElementById("box"+i)?.dataset.isFooter) continue; // Skip footers
+
+        totalLines += parseInt(document.getElementById("hBefore"+i)?.value) || 0;
+        totalLines += 1;
+
+        if(document.getElementById("mode"+i).checked) {
+            if (totalLines % LINES_PER_PAGE !== 0) {
+                totalLines = Math.ceil(totalLines / LINES_PER_PAGE) * LINES_PER_PAGE;
+        }
+        } else {
+            totalLines += parseInt(document.getElementById("lines"+i)?.value) || 0;
+        }
+
+        if(document.getElementById("textEnable"+i).checked){
+            totalLines += parseInt(document.getElementById("tBefore"+i)?.value) || 0;
+            let textContent = document.getElementById("tContent"+i)?.value || "";
+            let charsPerLine = 80;
+            let wrappedLines = 0;
+            textContent.split('\n').forEach(line => {
+                wrappedLines += Math.ceil(line.length / charsPerLine) || 1;
+            });
+            totalLines += wrappedLines || textContent.split('\n').length;
+
+            if(document.getElementById("tMode"+i).checked) {
+                totalLines = Math.ceil(totalLines / LINES_PER_PAGE) * LINES_PER_PAGE;
+            } else {
+                totalLines += parseInt(document.getElementById("tAfter"+i)?.value) || 0;
+            }
+        }
+
+        if(document.getElementById("imageEnable"+i).checked && document.getElementById("imgData"+i)?.value){
+            let imgHeight = parseFloat(document.getElementById("imgHeight"+i)?.value) || 3;
+            totalLines += Math.ceil(imgHeight * 6);
+
+            if(document.getElementById("imgTillEnd"+i).checked) {
+                totalLines = Math.ceil(totalLines / LINES_PER_PAGE) * LINES_PER_PAGE;
+            } else {
+                totalLines += parseInt(document.getElementById("imgAfter"+i)?.value) || 0;
+            }
+        }
+    }
+
+    return totalLines;
+}
+
+function buildImagePreview(id){
+    let previewContainer = document.getElementById("imageWordPreview");
+    previewContainer.innerHTML = "";
+
+    let linesBefore = calculateTotalLinesBefore(id);
+    let targetPage = Math.floor(linesBefore / LINES_PER_PAGE) + 1;
+
+    document.getElementById("imagePageIndicator").textContent = "Page " + targetPage;
+
+    let borderEnabled = document.getElementById("borderCheck").checked;
+    if(borderEnabled) previewContainer.classList.add("with-border");
+    else previewContainer.classList.remove("with-border");
+
+    let wmText = document.getElementById("watermarkText").value;
+    if(document.getElementById("wmcheck").checked && wmText){
+        let wmDiv = document.createElement("div");
+        wmDiv.className = "watermark";
+        wmDiv.textContent = wmText;
+        previewContainer.appendChild(wmDiv);
+    }
+
+    let pageContent = document.createElement("div");
+    pageContent.className = "page-content";
+
+    // Render all content including footers
+    for(let i=0; i<headingCount; i++){
+        if(i !== id) continue;
+
+
+        let isFooter = document.getElementById("box"+i)?.dataset.isFooter;
+
+        if(isFooter) {
+            // Render footer at bottom
+            let footerDiv = document.createElement("div");
+            footerDiv.className = "preview-footer";
+            footerDiv.textContent = document.getElementById("text"+i).value || "";
+            footerDiv.style.fontFamily = document.getElementById("font"+i).value;
+            footerDiv.style.fontSize = document.getElementById("size"+i).value + "pt";
+            let align = document.getElementById("footerAlign"+i)?.value || "left";
+            footerDiv.style.textAlign = align;
+            previewContainer.appendChild(footerDiv);
+            continue;
+        }
+
+        // Regular heading rendering...
+        let headingBeforeLines = parseInt(document.getElementById("hBefore"+i)?.value) || 0;
+        for(let j=0; j<headingBeforeLines; j++) pageContent.appendChild(document.createElement("br"));
+
+        let headingText = document.getElementById("text"+i).value || "Heading";
+        let headingDiv = document.createElement("div");
+        headingDiv.className = "preview-heading";
+        headingDiv.style.fontFamily = document.getElementById("font"+i).value;
+        headingDiv.style.fontSize = document.getElementById("size"+i).value + "pt";
+        headingDiv.textContent = headingText;
+        pageContent.appendChild(headingDiv);
+
+        let spacing = document.getElementById("mode"+i).checked ? "till_end" : parseInt(document.getElementById("lines"+i).value) || 0;
+        if(spacing !== "till_end"){
+            for(let j=0; j<spacing; j++) pageContent.appendChild(document.createElement("br"));
+        }
+
+        if(document.getElementById("textEnable"+i).checked){
+            let textContent = document.getElementById("tContent"+i).value;
+            if(textContent){
+                let beforeLines = parseInt(document.getElementById("tBefore"+i).value) || 0;
+                for(let j=0; j<beforeLines; j++) pageContent.appendChild(document.createElement("br"));
+
+                let textDiv = document.createElement("div");
+                textDiv.className = "preview-text";
+                textDiv.style.fontFamily = document.getElementById("tFont"+i).value;
+                textDiv.style.fontSize = document.getElementById("tSize"+i).value + "pt";
+                textDiv.textContent = textContent;
+                pageContent.appendChild(textDiv);
+
+                if(document.getElementById("tMode"+i).checked && i < id){
+                    let breakDiv = document.createElement("div");
+                    breakDiv.style.cssText = "text-align:center;color:#999;margin:20px 0;";
+                    breakDiv.innerHTML = "<hr>--- Page Break ---<hr>";
+                    pageContent.appendChild(breakDiv);
+                } else {
+                    let afterLines = parseInt(document.getElementById("tAfter"+i).value) || 0;
+                    for(let j=0; j<afterLines; j++) pageContent.appendChild(document.createElement("br"));
+                }
+            }
+        }
+
+        if(document.getElementById("imageEnable"+i).checked){
+            if(i === id && currentImageData){
+                let imgDiv = document.createElement("div");
+                imgDiv.className = "preview-image";
+
+                let label = document.createElement("div");
+                label.textContent = "← New Image";
+                label.style.cssText = "color:#4CAF50;font-size:10pt;margin-bottom:5px;";
+
+                let img = document.createElement("img");
+                img.src = currentImageData;
+                img.id = "previewImg";
+                img.style.cssText = "max-width:100%;height:auto;border:2px solid #4CAF50;padding:5px;";
+
+                let width = document.getElementById("widthSlider").value;
+                let height = document.getElementById("heightSlider").value;
+                img.style.width = width + "in";
+                img.style.height = height + "in";
+                img.style.objectFit = "contain";
+
+                imgDiv.appendChild(label);
+                imgDiv.appendChild(img);
+                pageContent.appendChild(imgDiv);
+            } else if(i !== id){
+                let existingImgData = document.getElementById("imgData"+i).value;
+                if(existingImgData){
+                    let imgDiv = document.createElement("div");
+                    imgDiv.className = "preview-image";
+
+                    let img = document.createElement("img");
+                    img.src = existingImgData;
+                    img.style.cssText = "max-width:100%;height:auto;border:1px solid #ddd;";
+
+                    let width = document.getElementById("imgWidth"+i).value || 4;
+                    let height = document.getElementById("imgHeight"+i).value || 3;
+                    img.style.width = width + "in";
+                    img.style.height = height + "in";
+                    img.style.objectFit = "contain";
+
+                    imgDiv.appendChild(img);
+                    pageContent.appendChild(imgDiv);
+                }
+            }
+        }
+    }
+
+    previewContainer.appendChild(pageContent);
+
+    let savedWidth = document.getElementById("imgWidth"+id)?.value || 4;
+    let savedHeight = document.getElementById("imgHeight"+id)?.value || 3;
+    document.getElementById("widthSlider").value = savedWidth;
+    document.getElementById("heightSlider").value = savedHeight;
+    document.getElementById("widthValue").textContent = savedWidth + '"';
+    document.getElementById("heightValue").textContent = savedHeight + '"';
+    if(document.getElementById("imgAfter"+id)) {
+        document.getElementById("previewImageAfter").value = document.getElementById("imgAfter"+id).value || 0;
+    }
+    if(document.getElementById("imgTillEnd"+id)) {
+        document.getElementById("previewImageTillEnd").checked = document.getElementById("imgTillEnd"+id).checked;
+    }
+}
+
+function openImagePreview(){
+    document.getElementById("imagePreviewModal").style.display = "block";
+    document.body.style.overflow = "hidden";
+}
+
+function closeImagePreview(){
+    document.getElementById("imagePreviewModal").style.display = "none";
+    document.body.style.overflow = "auto";
+}
+function closeVisualPreview(){
+    document.getElementById("visualPreviewModal").style.display = "none";
+    document.body.style.overflow = "auto";
+}
+
+function updateDimensions(){
+    let width = document.getElementById("widthSlider").value;
+    let height = document.getElementById("heightSlider").value;
+    document.getElementById("widthValue").textContent = width + '"';
+    document.getElementById("heightValue").textContent = height + '"';
+
+    let img = document.getElementById("previewImg");
+    if(img){
+        img.style.width = width + "in";
+        img.style.height = height + "in";
+    }
+}
+
+function saveImageSettings(){
+    if(currentEditingId !== null){
+        document.getElementById("imgWidth"+currentEditingId).value = document.getElementById("widthSlider").value;
+        document.getElementById("imgHeight"+currentEditingId).value = document.getElementById("heightSlider").value;
+        if(document.getElementById("imgAfter"+currentEditingId)) {
+            document.getElementById("imgAfter"+currentEditingId).value = document.getElementById("previewImageAfter").value;
+        }
+        if(document.getElementById("imgTillEnd"+currentEditingId)) {
+            document.getElementById("imgTillEnd"+currentEditingId).checked = document.getElementById("previewImageTillEnd").checked;
+        }
+
+        let btn = document.querySelector("#imagePreviewModal .controls-panel .btn-success");
+        btn.textContent = "✅ Saved!";
+        setTimeout(() => btn.textContent = "💾 Save Changes", 1000);
+    }
+}
+
+// ==================== VISUAL PREVIEW FUNCTIONS ====================
+
+// ==================== MULTI-PAGE PREVIEW FUNCTIONS ====================
+
+let currentPreviewPage = 1;
+let totalPreviewPages = 1;
+
+function showFullDocumentPreview() {
+    const modal = document.getElementById('visualPreviewModal');
+    const previewContainer = document.getElementById('visualWordPreview');
+
+    // Clear previous content
+    previewContainer.innerHTML = '';
+
+    // Calculate total pages needed
+    const totalLines = calculateTotalLinesForAllHeadings();
+    totalPreviewPages = Math.ceil(totalLines / LINES_PER_PAGE) || 1;
+    currentPreviewPage = 1;
+
+    // Render all pages
+    for (let pageNum = 1; pageNum <= totalPreviewPages; pageNum++) {
+        const pageDiv = document.createElement('div');
+        pageDiv.className = 'word-page preview-page';
+        pageDiv.id = `preview-page-${pageNum}`;
+        pageDiv.style.display = pageNum === 1 ? 'block' : 'none';
+        pageDiv.style.marginBottom = '20px';
+
+        // Add border if enabled
+        if (document.getElementById('borderCheck').checked) {
+            pageDiv.classList.add('with-border');
+        }
+
+        // Add watermark if enabled
+        if (document.getElementById('wmcheck').checked) {
+            const wmText = document.getElementById('watermarkText').value;
+            if (wmText) {
+                const wmDiv = document.createElement('div');
+                wmDiv.className = 'watermark';
+                wmDiv.textContent = wmText;
+                pageDiv.appendChild(wmDiv);
+            }
+        }
+
+        // Render content for this specific page
+        const pageContent = renderPageContent(pageNum);
+        pageDiv.appendChild(pageContent);
+
+        previewContainer.appendChild(pageDiv);
+    }
+
+    // Add pagination controls
+    addPaginationControls(modal, totalPreviewPages);
+
+    // Update page indicator
+    updatePageIndicator(1, totalPreviewPages);
+
+    modal.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+}
+
+function calculateTotalLinesForAllHeadings() {
+    let totalLines = 0;
+
+    for (let i = 0; i < headingCount; i++) {
+        if (!document.getElementById('text' + i)) continue;
+        if (document.getElementById('box' + i)?.dataset.isFooter) continue;
+
+        // Add heading before lines
+        totalLines += parseInt(document.getElementById('hBefore' + i)?.value) || 0;
+        totalLines += 1; // The heading itself
+
+        // Add spacing after heading
+        if (document.getElementById('mode' + i).checked) {
+            // Till end - fill to page boundary
+            const currentPageLines = totalLines % LINES_PER_PAGE;
+            if (currentPageLines !== 0) {
+                totalLines += LINES_PER_PAGE - currentPageLines;
+            }
+        } else {
+            totalLines += parseInt(document.getElementById('lines' + i)?.value) || 0;
+        }
+
+        // Add text block if enabled
+        if (document.getElementById('textEnable' + i).checked) {
+            totalLines += parseInt(document.getElementById('tBefore' + i)?.value) || 0;
+
+            const textContent = document.getElementById('tContent' + i)?.value || '';
+            const charsPerLine = 80;
+            let wrappedLines = 0;
+            textContent.split('\n').forEach(line => {
+                wrappedLines += Math.ceil(line.length / charsPerLine) || 1;
+            });
+            totalLines += wrappedLines || textContent.split('\n').length;
+
+            if (document.getElementById('tMode' + i).checked) {
+                const currentPageLines = totalLines % LINES_PER_PAGE;
+                if (currentPageLines !== 0) {
+                    totalLines += LINES_PER_PAGE - currentPageLines;
+                }
+            } else {
+                totalLines += parseInt(document.getElementById('tAfter' + i)?.value) || 0;
+            }
+        }
+
+        // Add image if enabled
+        if (document.getElementById('imageEnable' + i).checked) {
+            const imgHeight = parseFloat(document.getElementById('imgHeight' + i)?.value) || 3;
+            totalLines += Math.ceil(imgHeight * 6);
+
+            if (document.getElementById('imgTillEnd' + i).checked) {
+                const currentPageLines = totalLines % LINES_PER_PAGE;
+                if (currentPageLines !== 0) {
+                    totalLines += LINES_PER_PAGE - currentPageLines;
+                }
+            } else {
+                totalLines += parseInt(document.getElementById('imgAfter' + i)?.value) || 0;
+            }
+        }
+    }
+
+    return totalLines;
+}
+
+function renderPageContent(targetPageNum) {
+    const pageContent = document.createElement('div');
+    pageContent.className = 'page-content';
+
+    let currentLine = 0;
+    let startLine = (targetPageNum - 1) * LINES_PER_PAGE;
+    let endLine = targetPageNum * LINES_PER_PAGE;
+    let pageFull = false;
+
+    for (let i = 0; i < headingCount; i++) {
+        if (!document.getElementById('text' + i)) continue;
+
+        // Skip footers for main content (they go at bottom)
+        if (document.getElementById('box' + i)?.dataset.isFooter) continue;
+        if (currentLine >= endLine) {
+            pageFull = true;
+            break;
+        }
+        // Calculate lines before this heading
+        let headingBeforeLines = parseInt(document.getElementById('hBefore' + i)?.value) || 0;
+        let headingStartLine = currentLine + headingBeforeLines;
+
+        // Check if this heading starts on or after our target page
+        if (headingStartLine >= endLine) break;
+
+        // Check if heading ends before our target page starts
+        let headingEndLine = headingStartLine + 1;
+
+        // Only render if this heading appears on this page
+        if (headingEndLine > startLine) {
+            // Render heading before lines (only if on this page)
+            if (headingStartLine >= startLine) {
+                for (let b = 0; b < headingBeforeLines && currentLine + b < endLine; b++) {
+                    if (currentLine + b >= startLine) {
+                        pageContent.appendChild(document.createElement('br'));
+                    }
+                }
+
+                // Render heading
+                const headingText = document.getElementById('text' + i)?.value || 'Heading';
+                const headingDiv = document.createElement('div');
+                headingDiv.className = 'preview-heading';
+                headingDiv.style.fontFamily = document.getElementById('font' + i)?.value || 'Calibri';
+                headingDiv.style.fontSize = (document.getElementById('size' + i)?.value || '16') + 'pt';
+                headingDiv.textContent = headingText;
+                pageContent.appendChild(headingDiv);
+            }
+
+            currentLine = headingEndLine;
+
+            // Handle spacing after heading
+            let spacing = 0;
+            if (document.getElementById('mode' + i).checked) {
+                const currentPageLines = currentLine % LINES_PER_PAGE;
+                spacing = currentPageLines === 0 ? 0 : LINES_PER_PAGE - currentPageLines;
+            } else {
+                spacing = parseInt(document.getElementById('lines' + i)?.value) || 0;
+            }
+
+            for (let s = 0; s < spacing && currentLine < endLine; s++) {
+                if (currentLine >= startLine) {
+                    pageContent.appendChild(document.createElement('br'));
+                }
+                currentLine++;
+            }
+
+            // Render text block if enabled and fits on this page
+            if (document.getElementById('textEnable' + i).checked) {
+                const textContent = document.getElementById('tContent' + i)?.value;
+                if (textContent) {
+                    const beforeLines = parseInt(document.getElementById('tBefore' + i)?.value) || 0;
+                    for (let b = 0; b < beforeLines && currentLine < endLine; b++) {
+                        if (currentLine >= startLine) {
+                            pageContent.appendChild(document.createElement('br'));
+                        }
+                        currentLine++;
+                    }
+
+                    if (currentLine < endLine) {
+                        const textDiv = document.createElement('div');
+                        textDiv.className = 'preview-text';
+                        textDiv.style.fontFamily = document.getElementById('tFont' + i)?.value || 'Calibri';
+                        textDiv.style.fontSize = (document.getElementById('tSize' + i)?.value || '12') + 'pt';
+                        textDiv.textContent = textContent;
+                        pageContent.appendChild(textDiv);
+
+                        const charsPerLine = 80;
+                        let wrappedLines = 0;
+                        textContent.split('\n').forEach(line => {
+                            wrappedLines += Math.ceil(line.length / charsPerLine) || 1;
+                        });
+                        currentLine += wrappedLines || textContent.split('\n').length;
+                    }
+
+                    // Handle text after spacing
+                    let textAfter = 0;
+                    if (document.getElementById('tMode' + i).checked) {
+                        const currentPageLines = currentLine % LINES_PER_PAGE;
+                        textAfter = currentPageLines === 0 ? 0 : LINES_PER_PAGE - currentPageLines;
+                    } else {
+                        textAfter = parseInt(document.getElementById('tAfter' + i)?.value) || 0;
+                    }
+
+                    for (let a = 0; a < textAfter && currentLine < endLine; a++) {
+                        if (currentLine >= startLine) {
+                            pageContent.appendChild(document.createElement('br'));
+                        }
+                        currentLine++;
+                    }
+                }
+            }
+
+            // Render image if enabled
+            if (document.getElementById('imageEnable' + i).checked) {
+                const imgData = document.getElementById('imgData' + i)?.value;
+                if (imgData && currentLine < endLine) {
+                    const imgDiv = document.createElement('div');
+                    imgDiv.className = 'preview-image';
+
+                    const img = document.createElement('img');
+                    img.src = imgData;
+                    img.style.maxWidth = (document.getElementById('imgWidth' + i)?.value || 4) + 'in';
+                    img.style.height = 'auto';
+
+                    imgDiv.appendChild(img);
+                    pageContent.appendChild(imgDiv);
+
+                    const imgHeight = parseFloat(document.getElementById('imgHeight' + i)?.value) || 3;
+                    currentLine += Math.ceil(imgHeight * 6);
+
+                    // Handle image after spacing
+                    let imgAfter = 0;
+                    if (document.getElementById('imgTillEnd' + i).checked) {
+                        const currentPageLines = currentLine % LINES_PER_PAGE;
+                        imgAfter = currentPageLines === 0 ? 0 : LINES_PER_PAGE - currentPageLines;
+                    } else {
+                        imgAfter = parseInt(document.getElementById('imgAfter' + i)?.value) || 0;
+                    }
+
+                    for (let a = 0; a < imgAfter && currentLine < endLine; a++) {
+                        if (currentLine >= startLine) {
+                            pageContent.appendChild(document.createElement('br'));
+                        }
+                        currentLine++;
+                    }
+                }
+            }
+        } else {
+            // Skip this heading's lines if it's before our target page
+            currentLine = headingEndLine;
+
+            // Add spacing
+            if (document.getElementById('mode' + i).checked) {
+                const currentPageLines = currentLine % LINES_PER_PAGE;
+                currentLine += currentPageLines === 0 ? 0 : LINES_PER_PAGE - currentPageLines;
+            } else {
+                currentLine += parseInt(document.getElementById('lines' + i)?.value) || 0;
+            }
+
+            // Add text block lines if enabled
+            if (document.getElementById('textEnable' + i).checked) {
+                const textContent = document.getElementById('tContent' + i)?.value || '';
+                const charsPerLine = 80;
+                let wrappedLines = 0;
+                textContent.split('\n').forEach(line => {
+                    wrappedLines += Math.ceil(line.length / charsPerLine) || 1;
+                });
+                currentLine += wrappedLines || textContent.split('\n').length;
+                currentLine += parseInt(document.getElementById('tBefore' + i)?.value) || 0;
+
+                if (document.getElementById('tMode' + i).checked) {
+                    const currentPageLines = currentLine % LINES_PER_PAGE;
+                    currentLine += currentPageLines === 0 ? 0 : LINES_PER_PAGE - currentPageLines;
+                } else {
+                    currentLine += parseInt(document.getElementById('tAfter' + i)?.value) || 0;
+                }
+            }
+
+            // Add image lines if enabled
+            if (document.getElementById('imageEnable' + i).checked) {
+                const imgHeight = parseFloat(document.getElementById('imgHeight' + i)?.value) || 3;
+                currentLine += Math.ceil(imgHeight * 6);
+
+                if (document.getElementById('imgTillEnd' + i).checked) {
+                    const currentPageLines = currentLine % LINES_PER_PAGE;
+                    currentLine += currentPageLines === 0 ? 0 : LINES_PER_PAGE - currentPageLines;
+                } else {
+                    currentLine += parseInt(document.getElementById('imgAfter' + i)?.value) || 0;
+                }
+            }
+        }
+    }
+
+    // Add footers to each page
+    for (let i = 0; i < headingCount; i++) {
+        if (document.getElementById('box' + i)?.dataset.isFooter) {
+            const footerDiv = document.createElement('div');
+            footerDiv.className = 'preview-footer';
+            footerDiv.textContent = document.getElementById('text' + i).value || '';
+            footerDiv.style.fontFamily = document.getElementById('font' + i).value || 'Calibri';
+            footerDiv.style.fontSize = (document.getElementById('size' + i).value || '10') + 'pt';
+            footerDiv.style.textAlign = document.getElementById('footerAlign' + i)?.value || 'left';
+            pageContent.appendChild(footerDiv);
+        }
+    }
+
+    return pageContent;
+}
+
+function addPaginationControls(modal, totalPages) {
+    // Remove existing controls
+    const existingControls = modal.querySelector('.pagination-controls');
+    if (existingControls) existingControls.remove();
+
+    const controlsDiv = document.createElement('div');
+    controlsDiv.className = 'pagination-controls';
+    controlsDiv.style.cssText = 'display: flex; justify-content: center; align-items: center; gap: 16px; padding: 16px; background: white; border-radius: 8px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);';
+
+    const prevBtn = document.createElement('button');
+    prevBtn.className = 'btn btn-primary';
+    prevBtn.textContent = '← Previous';
+    prevBtn.onclick = () => changePreviewPage(-1);
+    prevBtn.disabled = true;
+
+    const pageIndicator = document.createElement('div');
+    pageIndicator.id = 'previewPageIndicator';
+    pageIndicator.style.cssText = 'font-weight: bold; font-size: 16px; min-width: 120px; text-align: center;';
+    pageIndicator.textContent = `Page 1 of ${totalPages}`;
+
+    const nextBtn = document.createElement('button');
+    nextBtn.className = 'btn btn-primary';
+    nextBtn.textContent = 'Next →';
+    nextBtn.onclick = () => changePreviewPage(1);
+    nextBtn.disabled = totalPages <= 1;
+
+    controlsDiv.appendChild(prevBtn);
+    controlsDiv.appendChild(pageIndicator);
+    controlsDiv.appendChild(nextBtn);
+
+    // Insert controls before the preview content
+    const content = modal.querySelector('.visual-preview-content');
+    const previewTitle = content.querySelector('.preview-title');
+    content.insertBefore(controlsDiv, previewTitle.nextSibling);
+}
+
+function changePreviewPage(direction) {
+    const newPage = currentPreviewPage + direction;
+    if (newPage < 1 || newPage > totalPreviewPages) return;
+
+    // Hide current page
+    document.getElementById(`preview-page-${currentPreviewPage}`).style.display = 'none';
+
+    // Show new page
+    document.getElementById(`preview-page-${newPage}`).style.display = 'block';
+
+    currentPreviewPage = newPage;
+    updatePageIndicator(currentPreviewPage, totalPreviewPages);
+
+    // Update button states
+    const controls = document.querySelector('.pagination-controls');
+    controls.children[0].disabled = currentPreviewPage === 1;
+    controls.children[2].disabled = currentPreviewPage === totalPreviewPages;
+}
+
+function updatePageIndicator(current, total) {
+    const indicator = document.getElementById('previewPageIndicator');
+    if (indicator) {
+        indicator.textContent = `Page ${current} of ${total}`;
+    }
+
+    const oldIndicator = document.getElementById('visualPageIndicator');
+    if (oldIndicator) {
+        oldIndicator.textContent = `Page ${current} of ${total}`;
+    }
+}
+
+// Keep old function for backward compatibility but make it call the new one
+function showVisualPreview(headingId) {
+    showFullDocumentPreview();
+}
+// ==================== TEMPLATE FUNCTIONS ====================
+
+function generateShareCode() {
+    let templateData = collectTemplateData();
+    if(templateData.headings.length === 0) {
+        showError("Create at least one heading first!");
+        return;
+    }
+
+    // Ask for template name
+    // Get template name from input field
+let templateName = document.getElementById('templateNameInput').value.trim();
+if (!templateName) {
+    templateName = "My Template"; // Default if empty
+}
+
+    templateData.template_name = templateName;
+
+    fetch('/save_template', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(templateData)
+    })
+    .then(r => r.json())
+    .then(data => {
+        if(data.success) {
+            document.getElementById('generatedCode').textContent = data.code;
+            document.getElementById('codeDisplayArea').classList.remove('hidden');
+            showSuccess("Template saved! Code: " + data.code);
+        } else {
+            showError("Error: " + data.error);
+        }
+    })
+    .catch(err => showError("Network error: " + err));
+}
+
+function loadTemplate() {
+    let code = document.getElementById('loadCodeInput').value.trim().toUpperCase();
+    if(code.length !== 8) {
+        showError("Enter a valid 8-character code!");
+        return;
+    }
+    fetch('/load_template/' + code)
+    .then(r => r.json())
+    .then(data => {
+        if(data.success) {
+            applyTemplate(data.template);
+            showSuccess("Template loaded! All settings restored.");
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+            showError("Code not found! Check and try again.");
+        }
+    })
+    .catch(err => showError("Network error: " + err));
+}
+
+function copyCode() {
+    let code = document.getElementById('generatedCode').textContent;
+    navigator.clipboard.writeText(code).then(() => {
+        showSuccess("Code copied to clipboard!");
+    });
+}
+
+function showSuccess(msg) {
+    let el = document.getElementById('successMsg');
+    el.textContent = msg;
+    el.className = 'message success';
+    setTimeout(() => el.className = 'message', 5000);
+}
+
+function showError(msg) {
+    let el = document.getElementById('errorMsg');
+    el.textContent = msg;
+    el.className = 'message error';
+    setTimeout(() => el.className = 'message', 5000);
+}
+
+function collectTemplateData() {
+    let headings = [];
+    for(let i=0; i<headingCount; i++){
+        let textEl = document.getElementById("text"+i);
+        if(!textEl) continue;
+
+        let isFooter = document.getElementById("box"+i)?.dataset.isFooter === "true";
+
+        if(isFooter) {
+            headings.push({
+            text: textEl.value || "",
+            font: document.getElementById("font"+i).value || "Calibri",
+            size: document.getElementById("size"+i).value || "10",
+            is_footer: true,
+            footer_align: document.getElementById("footerAlign"+i)?.value || "center",
+            before_lines: document.getElementById("hBefore"+i)?.value || "0",
+            spacing: document.getElementById("mode"+i).checked ? "till_end" : (document.getElementById("lines"+i).value || "0"),
+            text_enabled: document.getElementById("textEnable"+i).checked,
+            text_before: document.getElementById("tBefore"+i)?.value || "0",
+            text_content: document.getElementById("tContent"+i)?.value || "",
+            text_font: document.getElementById("tFont"+i)?.value || "Calibri",
+            text_size: document.getElementById("tSize"+i)?.value || "12",
+            text_after: document.getElementById("tAfter"+i)?.value || "0",
+            text_till_end: document.getElementById("tMode"+i)?.checked || false,
+            image_enabled: false
+        });
+    } else {
+            headings.push({
+                text: textEl.value || "",
+                font: document.getElementById("font"+i).value || "Calibri",
+                size: document.getElementById("size"+i).value || "16",
+                before_lines: document.getElementById("hBefore"+i)?.value || "0",
+                spacing: document.getElementById("mode"+i).checked ? "till_end" : (document.getElementById("lines"+i).value || "1"),
+                text_enabled: document.getElementById("textEnable"+i).checked,
+                text_before: document.getElementById("tBefore"+i)?.value || "0",
+                text_content: document.getElementById("tContent"+i)?.value || "",
+                text_font: document.getElementById("tFont"+i)?.value || "Calibri",
+                text_size: document.getElementById("tSize"+i)?.value || "12",
+                text_after: document.getElementById("tAfter"+i)?.value || "0",
+                text_till_end: document.getElementById("tMode"+i)?.checked || false,
+                image_enabled: document.getElementById("imageEnable"+i).checked,
+                image_data: document.getElementById("imgData"+i)?.value || "",
+                image_width: document.getElementById("imgWidth"+i)?.value || "4",
+                image_height: document.getElementById("imgHeight"+i)?.value || "3",
+                image_after: document.getElementById("imgAfter"+i)?.value || "0",
+                image_till_end: document.getElementById("imgTillEnd"+i)?.checked || false,
+                is_footer: false
+            });
+        }
+    }
+    return {
+        headings: headings,
+        border: document.getElementById("borderCheck").checked,
+        watermark: document.getElementById("watermarkText").value,
+        layout: document.getElementById("layoutSelect").value,
+        heading_count: headingCount
+    };
+}
+
+function applyTemplate(template) {
+    // Clear existing headings
+    document.getElementById('headingContainer').innerHTML = '';
+
+    // Reset heading count to 0 before rebuilding
+    headingCount = 0;
+
+    // Apply settings
+    document.getElementById("borderCheck").checked = template.border || false;
+    if(template.layout) {
+        document.getElementById("layoutSelect").value = template.layout;
+    } else {
+        document.getElementById("layoutSelect").value = "narrow";
+    }
+
+    // Apply watermark
+    if(template.watermark) {
+        document.getElementById("wmcheck").checked = true;
+        document.getElementById("wmtext").classList.remove("hidden");
+        document.getElementById("watermarkText").value = template.watermark;
+    } else {
+        document.getElementById("wmcheck").checked = false;
+        document.getElementById("wmtext").classList.add("hidden");
+        document.getElementById("watermarkText").value = "";
+    }
+
+    // Build headings with sequential IDs starting from 0
+    if (template.headings && template.headings.length > 0) {
+        template.headings.forEach((item, index) => {
+            headingCount = index; // Set to current index before creating
+            if(item.is_footer) {
+                createFooterFromData(item, index);
+            } else {
+                createHeadingFromData(item, index);
+            }
+        });
+        // Set headingCount to total after all created
+        headingCount = template.headings.length;
+    }
+
+    // Display the code if available
+    if (template.template_code || template.code) {
+        let code = template.template_code || template.code;
+        document.getElementById('generatedCode').textContent = code;
+        document.getElementById('codeDisplayArea').classList.remove('hidden');
+    }
+}
+
+function createFooterFromData(item, id) {
+    let div = document.createElement('div');
+    div.innerHTML = `
+    <div class="headingBox is-footer" id="box${id}" data-is-footer="true">
+        <div class="headingHeader" onclick="toggleSection(${id})">
+            <span>Footer <span class="footer-badge">PAGE FOOTER</span></span>
+            <button type="button" class="btn btn-danger" onclick="deleteHeading(${id}, event)" style="padding: 4px 12px; font-size: 12px; width: auto; min-height: 32px; margin: 0;">🗑️ Delete</button>
+        </div>
+        <div class="headingContent active" id="content${id}">
+            <label><strong>Footer Text:</strong>
+                <input type="text" id="text${id}" value="${escapeHtml(item.text)}" placeholder="Enter footer text here">
+            </label>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0;">
+                <label>Font:
+                    <select id="font${id}">
+                        <option ${item.font==='Calibri'?'selected':''}>Calibri</option>
+                        <option ${item.font==='Arial'?'selected':''}>Arial</option>
+                        <option ${item.font==='Arial Black'?'selected':''}>Arial Black</option>
+                        <option ${item.font==='Times New Roman'?'selected':''}>Times New Roman</option>
+                        <option ${item.font==='Courier New'?'selected':''}>Courier New</option>
+                    </select>
+                </label>
+                <label>Size:
+                    <input type="number" id="size${id}" value="${item.size || 10}" min="6" max="72">
+                </label>
+            </div>
+            <input type="hidden" id="footerAlign${id}" value="left">
+            <hr style="margin: 16px 0;">
+            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 12px 0;">
+                <label style="flex: 1; min-width: 120px; font-weight: 600;">Before Lines:
+                    <input type="number" id="hBefore${id}" value="${item.before_lines||'0'}" min="0">
+                </label>
+            </div>
+            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                <label style="flex: 1; min-width: 120px;">Lines after:
+                    <input type="number" id="lines${id}" value="${item.spacing==='till_end'?'0':(item.spacing||'0')}" ${item.spacing==='till_end'?'disabled style="opacity:0.4"':''}>
+                </label>
+                <label style="display: flex; align-items: center; margin: 0;">
+                    <input type="checkbox" id="mode${id}" onclick="spacingModeChange(${id})" ${item.spacing==='till_end'?'checked':''}>
+                    <span style="margin-left: 8px;">Till End</span>
+                </label>
+            </div>
+            <hr style="margin: 16px 0;">
+            <label style="font-weight: 600;">
+                <input type="checkbox" id="textEnable${id}" onchange="toggleText(${id})" ${item.text_enabled?'checked':''}>
+                Enable Text Block
+            </label>
+            <div id="textBlock${id}" class="${item.text_enabled?'':'hidden'}" style="margin-top: 12px; padding: 12px; background: #f9f9f9; border-radius: 6px;">
+                <label>Before Lines:
+                    <input type="number" id="tBefore${id}" value="${item.text_before||'0'}">
+                </label>
+                <label>Content:
+                    <textarea id="tContent${id}" rows="4" placeholder="Enter text content...">${escapeHtml(item.text_content)}</textarea>
+                </label>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <label>Font:
+                        <select id="tFont${id}">
+                            <option ${item.text_font==='Calibri'?'selected':''}>Calibri</option>
+                            <option ${item.text_font==='Arial'?'selected':''}>Arial</option>
+                            <option ${item.text_font==='Arial Black'?'selected':''}>Arial Black</option>
+                            <option ${item.text_font==='Times New Roman'?'selected':''}>Times New Roman</option>
+                        </select>
+                    </label>
+                    <label>Size:
+                        <input type="number" id="tSize${id}" value="${item.text_size||'12'}">
+                    </label>
+                </div>
+                <label style="margin-top: 12px;">After Lines:
+                    <input type="number" id="tAfter${id}" value="${item.text_after||'0'}">
+                </label>
+                <label style="margin-top: 8px;">
+                    <input type="checkbox" id="tMode${id}" ${item.text_till_end?'checked':''}>
+                    Till End
+                </label>
+            </div>
+            <input type="hidden" id="isFooter${id}" value="true">
+            <input type="hidden" id="imageEnable${id}">
+        </div>
+    </div>
+    `;
+    document.getElementById('headingContainer').appendChild(div.firstElementChild);
+}
+
+function createHeadingFromData(item, id) {
+    let div = document.createElement('div');
+    div.innerHTML = `
+    <div class="headingBox" id="box${id}">
+        <div class="headingHeader" onclick="toggleSection(${id})">
+            <span>Heading ${id+1}</span>
+            <button type="button" class="btn btn-danger" onclick="deleteHeading(${id}, event)" style="padding: 4px 12px; font-size: 12px; width: auto; min-height: 32px; margin: 0;">🗑️ Delete</button>
+        </div>
+        <div class="headingContent active" id="content${id}">
+            <label><strong>Heading Text:</strong>
+                <input type="text" id="text${id}" value="${escapeHtml(item.text)}" placeholder="Enter heading text">
+            </label>
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin: 12px 0; align-items: end;">
+                <label>Font:
+                    <select id="font${id}">
+                        <option ${item.font==='Calibri'?'selected':''}>Calibri</option>
+                        <option ${item.font==='Arial'?'selected':''}>Arial</option>
+                        <option ${item.font==='Arial Black'?'selected':''}>Arial Black</option>
+                        <option ${item.font==='Times New Roman'?'selected':''}>Times New Roman</option>
+                        <option ${item.font==='Courier New'?'selected':''}>Courier New</option>
+                    </select>
+                </label>
+                <label>Size:
+                    <input type="number" id="size${id}" value="${item.size || 16}" min="6" max="72">
+                </label>
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; margin-bottom: 8px;">
+                    <input type="checkbox" id="bold${id}" onchange="toggleBoldStyle(${id})" ${item.bold?'checked':''} style="width: 20px; height: 20px;">
+                    <span style="font-weight: bold; font-size: 16px;">Bold</span>
+                </label>
+            </div>
+            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 12px 0;">
+                <label style="flex: 1; min-width: 120px; font-weight: 600;">Before Lines:
+                    <input type="number" id="hBefore${id}" value="${item.before_lines||'0'}" min="0">
+                </label>
+            </div>
+            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                <label style="flex: 1; min-width: 120px;">Lines after:
+                    <input type="number" id="lines${id}" value="${item.spacing==='till_end'?'1':(item.spacing || '1')}" ${item.spacing==='till_end'?'disabled style="opacity:0.4"':''}>
+                </label>
+                <label style="display: flex; align-items: center; margin: 0;">
+                    <input type="checkbox" id="mode${id}" onclick="spacingModeChange(${id})" ${item.spacing==='till_end'?'checked':''}>
+                    <span style="margin-left: 8px;">Till End</span>
+                </label>
+            </div>
+            <hr style="margin: 16px 0;">
+            <label style="font-weight: 600;">
+                <input type="checkbox" id="textEnable${id}" onchange="toggleText(${id})" ${item.text_enabled?'checked':''}>
+                Enable Text Block
+            </label>
+            <div id="textBlock${id}" class="${item.text_enabled?'':'hidden'}" style="margin-top: 12px; padding: 12px; background: #f9f9f9; border-radius: 6px;">
+                <label>Before Lines:
+                    <input type="number" id="tBefore${id}" value="${item.text_before||'0'}">
+                </label>
+                <label>Content:
+                    <textarea id="tContent${id}" rows="4" placeholder="Enter text content...">${escapeHtml(item.text_content)}</textarea>
+                </label>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <label>Font:
+                        <select id="tFont${id}">
+                            <option ${item.text_font==='Calibri'?'selected':''}>Calibri</option>
+                            <option ${item.font==='Arial'?'selected':''}>Arial</option>
+                            <option ${item.font==='Arial Black'?'selected':''}>Arial Black</option>
+                            <option ${item.font==='Times New Roman'?'selected':''}>Times New Roman</option>
+                        </select>
+                    </label>
+                    <label>Size:
+                        <input type="number" id="tSize${id}" value="${item.text_size||'12'}">
+                    </label>
+                </div>
+                <label style="margin-top: 12px;">After Lines:
+                    <input type="number" id="tAfter${id}" value="${item.text_after||'0'}">
+                </label>
+                <label style="margin-top: 8px;">
+                    <input type="checkbox" id="tMode${id}" ${item.text_till_end?'checked':''}>
+                    Till End
+                </label>
+            </div>
+            <hr style="margin: 16px 0;">
+            <label style="font-weight: 600;">
+                <input type="checkbox" id="imageEnable${id}" onchange="toggleImage(${id})" ${item.image_enabled?'checked':''}>
+                Enable Image
+            </label>
+            <div id="imageBlock${id}" class="${item.image_enabled?'':'hidden'}" style="margin-top: 12px; padding: 12px; background: #f9f9f9; border-radius: 6px;">
+                <input type="file" id="imgFile${id}" accept="image/*" onchange="handleImageSelect(${id}, this)">
+                <input type="hidden" id="imgData${id}" value="${item.image_data||''}">
+                <input type="hidden" id="imgWidth${id}" value="${item.image_width||'4'}">
+                <input type="hidden" id="imgHeight${id}" value="${item.image_height||'3'}">
+                <input type="hidden" id="imgAfter${id}" value="${item.image_after||'0'}">
+                <input type="checkbox" id="imgTillEnd${id}" class="hidden" ${item.image_till_end?'checked':''}>
+                <div class="image-settings" id="imgSettings${id}" style="${item.image_data?'':'display:none;'} margin-top: 8px; color: #666; font-size: 14px;">
+                    ${item.image_data?'📷 Image loaded from template':'📷 Select an image file'}
+                </div>
+            </div>
+        </div>
+    </div>
+    `;
+    document.getElementById('headingContainer').appendChild(div.firstElementChild);
+}
+
+function escapeHtml(text) {
+    if(!text) return '';
+    return text.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+// ==================== UI FUNCTIONS ====================
+
+function toggleWM(){
+    let wmtext = document.getElementById("wmtext");
+    wmtext.classList.toggle("hidden");
+}
+
+function toggleSection(id){
+    let content = document.getElementById("content"+id);
+    let header = document.querySelector(`#box${id} .headingHeader`);
+    content.classList.toggle("active");
+    header.classList.toggle("collapsed");
+}
+
+function spacingModeChange(id){
+    let box = document.getElementById("lines"+id);
+    let checkbox = document.getElementById("mode"+id);
+    if(checkbox.checked){
+        box.disabled = true;
+        box.style.opacity = 0.4;
+    } else {
+        box.disabled = false;
+        box.style.opacity = 1;
+    }
+}
+
+function toggleText(id){
+    document.getElementById("textBlock"+id).classList.toggle("hidden");
+}
+
+function toggleImage(id){
+    document.getElementById("imageBlock"+id).classList.toggle("hidden");
+}
+
+function deleteHeading(id, event) {
+    event.stopPropagation();
+    let box = document.getElementById('box' + id);
+    if(box) {
+        box.remove();
+        renumberHeadings();
+        showSuccess('Item ' + (id+1) + ' deleted!');
+    }
+}
+
+function renumberHeadings() {
+    let boxes = document.querySelectorAll('.headingBox');
+    let regularCount = 0;
+
+    boxes.forEach((box, index) => {
+        let oldId = parseInt(box.id.replace('box', ''));
+        let newId = index;
+        let isFooter = box.dataset.isFooter === "true";
+
+        box.id = 'box' + newId;
+
+        // Update header text
+        let headerSpan = box.querySelector('.headingHeader span');
+        if(headerSpan && !isFooter) {
+            headerSpan.textContent = 'Heading ' + (regularCount + 1);
+            regularCount++;
+        }
+
+        let header = box.querySelector('.headingHeader');
+        if(header) header.setAttribute('onclick', 'toggleSection(' + newId + ')');
+
+        let content = box.querySelector('.headingContent');
+        if(content) content.id = 'content' + newId;
+
+        // Fix: Properly get and update input IDs
+        let inputs = box.querySelectorAll('*[id]');
+        inputs.forEach(input => {
+            let oldInputId = input.id;  // ✅ DEFINE oldInputId first!
+
+            // Only update IDs that end with the old number
+            if (oldInputId.endsWith(oldId.toString())) {
+                let baseName = oldInputId.slice(0, -oldId.toString().length);
+                let newInputId = baseName + newId;
+                input.id = newInputId;
+
+                // Update onchange handlers
+                if(input.hasAttribute('onchange')) {
+                    let onchange = input.getAttribute('onchange');
+                    onchange = onchange.replace(new RegExp('\\b' + oldId + '\\b', 'g'), newId);
+                    input.setAttribute('onchange', onchange);
+                }
+
+                // Update onclick handlers (except for delete and preview buttons)
+                                // Update onclick handlers (except for delete button)
+                if(input.hasAttribute('onclick')) {
+                    let onclick = input.getAttribute('onclick');
+                    if(!onclick.includes('deleteHeading')) {
+                        onclick = onclick.replace(new RegExp('\\b' + oldId + '\\b', 'g'), newId);
+                        input.setAttribute('onclick', onclick);
+                    }
+                }
+            }
+        });
+
+                        let deleteBtn = box.querySelector('.btn-danger');
+        if(deleteBtn) deleteBtn.setAttribute('onclick', 'deleteHeading(' + newId + ', event)');
+
+        // Remove preview button references since we now use global preview
+        let previewBtn = box.querySelector('.btn-info');
+        if(previewBtn) previewBtn.remove();
+    });
+
+    headingCount = boxes.length;
+}
+function toggleBoldStyle(id) {
+    let checkbox = document.getElementById("bold" + id);
+    let textInput = document.getElementById("text" + id);
+    if (checkbox.checked) {
+        textInput.style.fontWeight = "bold";
+    } else {
+        textInput.style.fontWeight = "normal";
+    }
+}
+
+function addHeading(){
+    let settings = getLastHeadingSettings();
+    let id = headingCount++;
+    let div = document.createElement('div');
+    div.innerHTML = `
+    <div class="headingBox" id="box${id}">
+                <div class="headingHeader" onclick="toggleSection(${id})">
+            <span>Heading ${id+1}</span>
+            <button type="button" class="btn btn-danger" onclick="deleteHeading(${id}, event)" style="padding: 4px 12px; font-size: 12px; width: auto; min-height: 32px; margin: 0;">🗑️ Delete</button>
+        </div>
+        <div class="headingContent active" id="content${id}">
+
+            <label><strong>Heading Text:</strong>
+                <input type="text" id="text${id}" value="Heading ${id+1}" placeholder="Enter heading text">
+            </label>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin: 12px 0; align-items: end;">
+                <label>Font:
+                    <select id="font${id}">
+                        <option ${settings.font==="Calibri"?"selected":""}>Calibri</option>
+                        <option ${settings.font==="Arial"?"selected":""}>Arial</option>
+                        <option ${settings.font==="Arial Black"?"selected":""}>Arial Black</option>
+                        <option ${settings.font==="Times New Roman"?"selected":""}>Times New Roman</option>
+                    </select>
+                </label>
+                <label>Size:
+                    <input type="number" id="size${id}" value="${settings.size}">
+                </label>
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; margin-bottom: 8px;">
+                    <input type="checkbox" id="bold${id}" onchange="toggleBoldStyle(${id})" style="width: 20px; height: 20px;">
+                    <span style="font-weight: bold; font-size: 16px;">Bold</span>
+                </label>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 12px 0;">
+                <label style="flex: 1; min-width: 120px; font-weight: 600;">Before Lines:
+                    <input type="number" id="hBefore${id}" value="0" min="0" placeholder="Lines before heading">
+                </label>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                <label style="flex: 1; min-width: 120px;">Lines after:
+                    <input type="number" id="lines${id}" value="0">
+                </label>
+                <label style="display: flex; align-items: center; margin: 0;">
+                    <input type="checkbox" id="mode${id}" onclick="spacingModeChange(${id})">
+                    <span style="margin-left: 8px;">Till End</span>
+                </label>
+            </div>
+
+            <hr style="margin: 16px 0;">
+
+            <label style="font-weight: 600;">
+                <input type="checkbox" id="textEnable${id}" onchange="toggleText(${id})">
+                Enable Text Block
+            </label>
+
+            <div id="textBlock${id}" class="hidden" style="margin-top: 12px; padding: 12px; background: #f9f9f9; border-radius: 6px;">
+                <label>Before Lines:
+                    <input type="number" id="tBefore${id}" value="0">
+                </label>
+                <label>Content:
+                    <textarea id="tContent${id}" rows="4" placeholder="Enter text content..."></textarea>
+                </label>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <label>Font:
+                        <select id="tFont${id}">
+                            <option>Calibri</option>
+                            <option>Arial</option>
+                            <option>Arial Black</option>
+                            <option>Times New Roman</option>
+                        </select>
+                    </label>
+                    <label>Size:
+                        <input type="number" id="tSize${id}" value="12">
+                    </label>
+                </div>
+                <label style="margin-top: 12px;">After Lines:
+                    <input type="number" id="tAfter${id}" value="0">
+                </label>
+                <label style="margin-top: 8px;">
+                    <input type="checkbox" id="tMode${id}">
+                    Till End
+                </label>
+            </div>
+
+            <hr style="margin: 16px 0;">
+
+            <label style="font-weight: 600;">
+                <input type="checkbox" id="imageEnable${id}" onchange="toggleImage(${id})">
+                Enable Image
+            </label>
+
+            <div id="imageBlock${id}" class="hidden" style="margin-top: 12px; padding: 12px; background: #f9f9f9; border-radius: 6px;">
+                <input type="file" id="imgFile${id}" accept="image/*" onchange="handleImageSelect(${id}, this)">
+                <input type="hidden" id="imgData${id}" value="">
+                <input type="hidden" id="imgWidth${id}" value="4">
+                <input type="hidden" id="imgHeight${id}" value="3">
+                <input type="hidden" id="imgAfter${id}" value="0">
+                <input type="checkbox" id="imgTillEnd${id}" class="hidden">
+                <div class="image-settings" id="imgSettings${id}" style="display:none; margin-top: 8px; color: #666; font-size: 14px;">
+                    📷 Image selected. Adjust in preview.
+                </div>
+            </div>
+        </div>
+    </div>
+    `;
+    document.getElementById('headingContainer').appendChild(div.firstElementChild);
+    setTimeout(() => toggleSection(id), 100);
+}
+
+// Close modals on outside click
+window.onclick = function(event){
+    if(event.target === document.getElementById('imagePreviewModal')){
+        closeImagePreview();
+    }
+    if(event.target === document.getElementById('visualPreviewModal')){
+        closeVisualPreview();
+    }
+}
+
+// Form submission
+// Form submission
+document.getElementById("mainForm").addEventListener("submit", function(e){
+    let headings = [];
+    for(let i=0; i<headingCount; i++){
+        let textEl = document.getElementById("text"+i);
+        if(!textEl) continue;
+
+        let isFooter = document.getElementById("box"+i)?.dataset.isFooter === "true";
+
+        if(isFooter) {
+            headings.push({
+                text: textEl.value || "",
+                font: document.getElementById("font"+i).value || "Calibri",
+                size: document.getElementById("size"+i).value || "10",
+                bold: document.getElementById("bold"+i)?.checked || false,
+                is_footer: true,
+                footer_align: document.getElementById("footerAlign"+i)?.value || "center",
+                before_lines: document.getElementById("hBefore"+i)?.value || "0",
+                spacing: document.getElementById("mode"+i).checked ? "till_end" : (document.getElementById("lines"+i).value || "0"),
+                text_enabled: document.getElementById("textEnable"+i).checked,
+                text_before: document.getElementById("tBefore"+i)?.value || "0",
+                text_content: document.getElementById("tContent"+i)?.value || "",
+                text_font: document.getElementById("tFont"+i)?.value || "Calibri",
+                text_size: document.getElementById("tSize"+i)?.value || "12",
+                text_after: document.getElementById("tAfter"+i)?.value || "0",
+                text_till_end: document.getElementById("tMode"+i)?.checked || false,
+                image_enabled: false
+            });
+        } else {
+            headings.push({
+                text: textEl.value || "",
+                font: document.getElementById("font"+i).value || "Calibri",
+                size: document.getElementById("size"+i).value || "16",
+                bold: document.getElementById("bold"+i)?.checked || false,
+                before_lines: document.getElementById("hBefore"+i)?.value || "0",
+                spacing: document.getElementById("mode"+i).checked ? "till_end" : (document.getElementById("lines"+i).value || "1"),
+                text_enabled: document.getElementById("textEnable"+i).checked,
+                text_before: document.getElementById("tBefore"+i)?.value || "0",
+                text_content: document.getElementById("tContent"+i)?.value || "",
+                text_font: document.getElementById("tFont"+i).value || "Calibri",
+                text_size: document.getElementById("tSize"+i).value || "12",
+                text_after: document.getElementById("tAfter"+i).value || "0",
+                text_till_end: document.getElementById("tMode"+i)?.checked || false,
+                image_enabled: document.getElementById("imageEnable"+i).checked,
+                image_data: document.getElementById("imgData"+i)?.value || "",
+                image_width: document.getElementById("imgWidth"+i)?.value || "4",
+                image_height: document.getElementById("imgHeight"+i)?.value || "3",
+                image_after: document.getElementById("imgAfter"+i)?.value || "0",
+                image_till_end: document.getElementById("imgTillEnd"+i)?.checked || false,
+                is_footer: false
+            });
+        }
+    }
+    document.getElementById("headingsData").value = JSON.stringify(headings);
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Fix for visual preview close button
+    document.querySelector('.close-visual-preview').addEventListener('click', function(e) {
+        e.stopPropagation();
+        closeVisualPreview();
+    });
+
+    // Fix for image preview close button
+    document.querySelector('.close-image-preview').addEventListener('click', function(e) {
+        e.stopPropagation();
+        closeImagePreview();
+    });
+});
+
+// ==================== IMPORT CONTENT FROM DOCUMENT ====================
+
+function importFromDocument() {
+    let fileInput = document.getElementById('importDocFile');
+    let file = fileInput.files[0];
+
+    if(!file) {
+        showImportError("Please select a .docx file first!");
+        return;
+    }
+
+    // Collect current template headings
+    let headings = [];
+    for(let i=0; i<headingCount; i++){
+        let textEl = document.getElementById("text"+i);
+        if(!textEl) continue;
+        if(document.getElementById("box"+i)?.dataset.isFooter) continue;
+
+        headings.push({
+            id: i,
+            text: textEl.value || "",
+            is_footer: false
+        });
+    }
+
+    if(headings.length === 0) {
+        showImportError("Create at least one heading first!");
+        return;
+    }
+
+    // Prepare form data
+    let formData = new FormData();
+    formData.append('file', file);
+    formData.append('headings', JSON.stringify(headings));
+
+    // Show loading state
+    let btn = document.querySelector('#sharePanel button[onclick="importFromDocument()"]');
+    let originalText = btn.textContent;
+    btn.textContent = "⏳ Processing...";
+    btn.disabled = true;
+
+    fetch('/import_content', {
+        method: 'POST',
+        body: formData
+    })
+    .then(r => r.json())
+    .then(data => {
+        btn.textContent = originalText;
+        btn.disabled = false;
+
+        if(data.success) {
+            let matchCount = 0;
+
+            // Fill in the content
+            for(let id in data.content_map) {
+                let content = data.content_map[id];
+                let textContentEl = document.getElementById("tContent" + id);
+                let textEnableEl = document.getElementById("textEnable" + id);
+                let textBlockEl = document.getElementById("textBlock" + id);
+
+                if(textContentEl && content) {
+                    // Enable text block if not already enabled
+                    if(textEnableEl && !textEnableEl.checked) {
+                        textEnableEl.checked = true;
+                        if(textBlockEl) textBlockEl.classList.remove('hidden');
+                    }
+
+                    // Set content
+                    textContentEl.value = content;
+                    matchCount++;
+                }
+            }
+
+            if(matchCount > 0) {
+                showImportSuccess(`Successfully imported content for ${matchCount} heading(s)!`);
+                // Close panel after 2 seconds
+                setTimeout(() => toggleSharePanel(), 2000);
+            } else {
+                showImportError("No matching headings found in document. Make sure your document headings match exactly.");
+            }
+        } else {
+            showImportError("Error: " + data.error);
+        }
+    })
+    .catch(err => {
+        btn.textContent = originalText;
+        btn.disabled = false;
+        showImportError("Network error: " + err);
+    });
+}
+
+function showImportSuccess(msg) {
+    let el = document.getElementById('importSuccessMsg');
+    el.textContent = msg;
+    el.className = 'message success';
+    el.style.display = 'block';
+    setTimeout(() => el.style.display = 'none', 5000);
+}
+
+function showImportError(msg) {
+    let el = document.getElementById('importErrorMsg');
+    el.textContent = msg;
+    el.className = 'message error';
+    el.style.display = 'block';
+    setTimeout(() => el.style.display = 'none', 5000);
+}
+
+// ==================== IMPORT TAB SWITCHING ====================
+
+function switchImportTab(tab) {
+    let fileSection = document.getElementById('importFileSection');
+    let textSection = document.getElementById('importTextSection');
+    let fileBtn = document.getElementById('tabFileBtn');
+    let textBtn = document.getElementById('tabTextBtn');
+
+    if(tab === 'file') {
+        fileSection.style.display = 'block';
+        textSection.style.display = 'none';
+        fileBtn.style.opacity = '1';
+        fileBtn.style.background = '#1565c0';
+        textBtn.style.opacity = '0.7';
+        textBtn.style.background = '#757575';
+    } else {
+        fileSection.style.display = 'none';
+        textSection.style.display = 'block';
+        fileBtn.style.opacity = '0.7';
+        fileBtn.style.background = '#757575';
+        textBtn.style.opacity = '1';
+        textBtn.style.background = '#1565c0';
+    }
+}
+
+// ==================== IMPORT FROM TEXT ====================
+
+function importFromText() {
+    let textArea = document.getElementById('importTextArea');
+    let rawText = textArea.value;
+
+    if(!rawText.trim()) {
+        showImportError("Please paste some text first!");
+        return;
+    }
+
+    // Collect current template headings
+    let headings = [];
+    for(let i=0; i<headingCount; i++){
+        let textEl = document.getElementById("text"+i);
+        if(!textEl) continue;
+        if(document.getElementById("box"+i)?.dataset.isFooter) continue;
+
+        headings.push({
+            id: i,
+            text: textEl.value || "",
+            is_footer: false
+        });
+    }
+
+    if(headings.length === 0) {
+        showImportError("Create at least one heading first!");
+        return;
+    }
+
+    // Show loading state
+    let btn = document.querySelector('#importTextSection button');
+    let originalText = btn.textContent;
+    btn.textContent = "⏳ Processing...";
+    btn.disabled = true;
+
+    fetch('/import_content_text', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            text: rawText,
+            headings: headings
+        })
+    })
+    .then(r => r.json())
+    .then(data => {
+        btn.textContent = originalText;
+        btn.disabled = false;
+
+        if(data.success) {
+            let matchCount = 0;
+            let tillEndCount = 0;
+
+            // Import content
+            for(let id in data.content_map) {
+                let content = data.content_map[id];
+                let textContentEl = document.getElementById("tContent" + id);
+                let textEnableEl = document.getElementById("textEnable" + id);
+                let textBlockEl = document.getElementById("textBlock" + id);
+
+                if(textContentEl && content) {
+                    if(textEnableEl && !textEnableEl.checked) {
+                        textEnableEl.checked = true;
+                        if(textBlockEl) textBlockEl.classList.remove('hidden');
+                    }
+                    textContentEl.value = content;
+                    matchCount++;
+                }
+            }
+
+            // Handle Till End settings
+            if(data.till_end_map) {
+                for(let id in data.till_end_map) {
+                    if(data.till_end_map[id] === true) {
+                        let modeCheckbox = document.getElementById("mode" + id);
+                        let linesInput = document.getElementById("lines" + id);
+
+                        if(modeCheckbox && !modeCheckbox.checked) {
+                            modeCheckbox.checked = true;
+                            if(linesInput) {
+                                linesInput.disabled = true;
+                                linesInput.style.opacity = 0.4;
+                            }
+                            tillEndCount++;
+                        }
+                    }
+                }
+            }
+
+            if(matchCount > 0) {
+                let msg = `Successfully imported content for ${matchCount} heading(s)!`;
+                if(tillEndCount > 0) {
+                    msg += ` Auto-set "Till End" for ${tillEndCount} heading(s).`;
+                }
+                showImportSuccess(msg);
+                // Clear the textarea after successful import
+                textArea.value = '';
+                setTimeout(() => toggleSharePanel(), 2500);
+            } else {
+                showImportError("No matching headings found. Make sure your text contains headings that match your template.");
+            }
+        } else {
+            showImportError("Error: " + data.error);
+        }
+    })
+    .catch(err => {
+        btn.textContent = originalText;
+        btn.disabled = false;
+        showImportError("Network error: " + err);
+    });
+}
+// ============================================
+// AUTO-LOAD TEMPLATE WHEN COMING FROM DASHBOARD
+// ============================================
+
+{% if load_template_code %}
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Auto-loading template: {{ load_template_code }}');
+
+    // Small delay to ensure all scripts are ready
+    setTimeout(function() {
+        document.getElementById('loadCodeInput').value = '{{ load_template_code }}';
+        loadTemplate();
+    }, 100);
+});
+{% endif %}
+// ============================================
+// AUTO-LOAD TEMPLATE WHEN COMING FROM DASHBOARD
+// ============================================
+
+{% if load_template_code %}
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Auto-loading template: {{ load_template_code }}');
+
+    // Set the code in the input
+    document.getElementById('loadCodeInput').value = '{{ load_template_code }}';
+
+    // Trigger the load after a short delay to ensure everything is ready
+    setTimeout(function() {
+        loadTemplate();
+    }, 200);
+});
+{% endif %}
+</script>
+
+</body>
+</html>
