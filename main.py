@@ -20,7 +20,7 @@ app = Flask(__name__, template_folder="templates")
 
 # Configuration
 app.config['SECRET_KEY'] = 'your-secret-key-change-this-in-production'  # Change this to a random string
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///record_generator.db'  # Creates database file
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/record_generator.db'  # Creates database file
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['MAX_CONTENT_LENGTH'] = 200 * 1024 * 1024
 
